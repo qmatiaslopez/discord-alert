@@ -1,0 +1,11 @@
+services:
+  webhook_service:
+    build: .
+    container_name: webhook_service
+    environment:
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+    restart: unless-stopped
