@@ -36,7 +36,7 @@ project/
 
 1. Clona el repositorio
 ```bash
-git clone https://github.com/qmatiaslopez/discord-alert
+git clone https://github.com/qmatiaslopez/discord-webhook-service
 ```
 
 2. Crea un archivo `.env`:
