@@ -39,7 +39,6 @@ discord-alert/
 - 🐳 Docker y Docker Compose instalados
 - 🔗 URL de webhook de Discord
 - 🐍 Python 3.11 o superior (para desarrollo local)
-- 🧪 pytest para testing
 
 ## 🛠️ Instalación
 
@@ -51,8 +50,6 @@ git clone https://github.com/yourusername/discord-alert
 2. Configura las variables de entorno:
 ```env
 DISCORD_WEBHOOK_URL=tu_url_de_webhook_aqui
-ENVIRONMENT=development
-LOG_LEVEL=INFO
 ```
 
 3. Construye y ejecuta con Docker Compose:
@@ -116,9 +113,6 @@ El proyecto utiliza pytest y pytest-asyncio para testing. Para ejecutar los test
 ```bash
 # Instalar dependencias de desarrollo
 pip install -r requirements.txt
-
-# Ejecutar tests
-pytest
 ```
 
 ## 📖 Documentación API
