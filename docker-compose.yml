@@ -1,11 +1,27 @@
 services:
-  webhook_service:
-    build: .
-    container_name: webhook_service
-    environment:
-      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+  discord_alert:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: discord_alert_service
+    volumes:
+      - ./src:/app/src
     ports:
       - "8000:8000"
-    volumes:
-      - ./app:/app/app
+    environment:
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-mock_webhook_url}
+      - PYTHONPATH=/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 5s
     restart: unless-stopped
+    networks:
+      - discord_alert_network
+
+networks:
+  discord_alert_network:
+    name: discord_alert_network
+    driver: bridge
