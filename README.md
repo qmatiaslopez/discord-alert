@@ -1,29 +1,37 @@
-# 🚀 Discord Webhook Notification System
+# 🚀 Discord Webhook Notification Service
 
 Sistema de notificaciones basado en FastAPI que procesa y envía mensajes formateados a Discord a través de webhooks. Diseñado para ser fácil de usar y altamente personalizable.
 
 ## 🌟 Características
 
 - 📝 Múltiples tipos de mensajes (INFO, ERROR, WARNING, SUCCESS, DEBUG, CRITICAL)
-- 🎨 Formato personalizado para cada tipo de mensaje
-- ⚡ Procesamiento en tiempo real
-- 🐳 Containerización con Docker
-- 🔄 Recarga automática durante desarrollo
-- 🤖 Integración con Discord
+- 🎨 Formato personalizado con emojis y colores para cada tipo de mensaje
+- ⚡ Procesamiento asíncrono en tiempo real
+- 🔄 Reintentos automáticos con backoff exponencial
+- 🔍 Validación robusta de mensajes
+- 🐳 Containerización con Docker y healthchecks
+- 🛡️ Seguridad mejorada con usuario no-root
+- 📊 Endpoints de estado y monitoreo
 
 ## 📁 Estructura del Proyecto
 
 ```
-project/
-├── app/
-│   ├── __init__.py
-│   ├── input_handler.py    # Rutas FastAPI y validación
-│   ├── processor.py        # Procesamiento y formato
-│   └── output_handler.py   # Comunicación con Discord
-├── Dockerfile
+discord-alert/
+├── src/
+│   ├── app/
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   └── message.py      # Modelos Pydantic
+│   │   └── services/
+│   │       ├── __init__.py
+│   │       ├── input.py        # Validación de mensajes
+│   │       ├── output.py       # Cliente Discord
+│   │       └── process.py      # Lógica de procesamiento
+│   ├── api.py                  # Endpoints FastAPI
+│   └── __init__.py
 ├── docker-compose.yml
-├── requirements.txt
-└── .env
+├── Dockerfile
+└── requirements.txt
 ```
 
 ## 📋 Requisitos Previos
@@ -31,17 +39,20 @@ project/
 - 🐳 Docker y Docker Compose instalados
 - 🔗 URL de webhook de Discord
 - 🐍 Python 3.11 o superior (para desarrollo local)
+- 🧪 pytest para testing
 
 ## 🛠️ Instalación
 
 1. Clona el repositorio
 ```bash
-git clone https://github.com/qmatiaslopez/discord-webhook-service
+git clone https://github.com/yourusername/discord-alert
 ```
 
-2. Crea un archivo `.env`:
+2. Configura las variables de entorno:
 ```env
 DISCORD_WEBHOOK_URL=tu_url_de_webhook_aqui
+ENVIRONMENT=development
+LOG_LEVEL=INFO
 ```
 
 3. Construye y ejecuta con Docker Compose:
@@ -51,75 +62,63 @@ docker-compose up -d
 
 ## 💻 Ejemplos de Uso
 
-### 1. Alerta de Seguridad 🔒
+### Envío de Mensaje 📨
 ```bash
 curl -X POST http://localhost:8000/webhook \
 -H "Content-Type: application/json" \
 -d '{
-  "type": "ERROR",
-  "content": "Actividad sospechosa detectada",
-  "origin": "monitor_seguridad",
+  "type": "INFO",
+  "content": "Usuario login exitoso",
+  "origin": "auth_service",
   "details": {
-    "ip_address": "45.123.45.67",
-    "location": "Desconocida",
-    "intentos_fallidos": "5"
+    "user_id": "123",
+    "ip": "192.168.1.1"
   }
 }'
 ```
 
-### 2. Notificación de Despliegue 🚀
+### Verificación de Salud 🏥
 ```bash
-curl -X POST http://localhost:8000/webhook \
--H "Content-Type: application/json" \
--d '{
-  "type": "SUCCESS",
-  "content": "Despliegue completado",
-  "origin": "pipeline_ci",
-  "details": {
-    "version": "v2.3.4",
-    "tiempo": "45s",
-    "ambiente": "produccion"
-  }
-}'
+curl http://localhost:8000/health
 ```
 
-## 🎨 Tipos de Mensajes
+## 🎨 Tipos de Mensajes y Formatos
 
-| Tipo | Color | Icono | Uso |
-|------|--------|------|----------|
-| INFO | Azul | ℹ️ | Información general |
-| ERROR | Rojo | ⚠️ | Notificación de errores |
-| WARNING | Amarillo | ⚡ | Alertas y advertencias |
-| SUCCESS | Verde | ✅ | Mensajes de éxito |
-| DEBUG | Gris | 🔍 | Información de depuración |
-| CRITICAL | Rojo Oscuro | 🚨 | Alertas críticas |
-
-## 👩‍💻 Desarrollo Local
-
-1. Instala las dependencias:
-```bash
-pip install -r requirements.txt
-```
-
-2. Ejecuta con uvicorn:
-```bash
-uvicorn app.input_handler:app --reload
-```
+| Tipo | Color | Emoji | Símbolo | Uso |
+|------|--------|-------|---------|-----|
+| INFO | 🔵 #3498db | 📢 | ℹ️ | Información general |
+| ERROR | 🔴 #e74c3c | ❌ | ⚠️ | Notificación de errores |
+| WARNING | 🟡 #f1c40f | ⚠️ | ⚡ | Alertas y advertencias |
+| SUCCESS | 🟢 #2ecc71 | 🎉 | ✅ | Mensajes de éxito |
+| DEBUG | ⚪ #95a5a6 | 🐛 | 🔍 | Información de depuración |
+| CRITICAL | 🔴 #992d22 | 💀 | 🚨 | Alertas críticas |
 
 ## 🐳 Comandos Docker
 
 ```bash
-# Construir el contenedor
-docker-compose build
-
-# Iniciar el servicio
+# Construir y levantar servicios
 docker-compose up -d
 
 # Ver logs
-docker-compose logs -f
+docker-compose logs -f discord_alert
 
-# Detener el servicio
+# Verificar estado
+curl http://localhost:8000/health
+
+# Detener servicios
 docker-compose down
+```
+
+## 🧪 Testing
+
+El proyecto utiliza pytest y pytest-asyncio para testing. Para ejecutar los tests:
+
+```bash
+# Instalar dependencias de desarrollo
+pip install -r requirements.txt
+
+# Ejecutar tests
+pytest
 ```
 
 ## 📖 Documentación API
